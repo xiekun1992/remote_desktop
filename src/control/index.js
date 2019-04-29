@@ -84,7 +84,7 @@ function captureScreen() {
     desktopCapturer.getSources({ types: ['window', 'screen'] }, (error, sources) => {
       if (error) reject(error);
       for (let i = 0; i < sources.length; ++i) {
-        if (sources[i].id === "screen:0:0") { // 获取主显示器的图像
+        if (sources[i].name === "xremote") { // 获取主显示器的图像
           resolve(navigator.mediaDevices.getUserMedia({
             audio: false,
             video: {
