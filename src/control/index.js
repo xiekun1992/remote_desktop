@@ -34,14 +34,14 @@ function handler(message) {
           });
         }, video, stream).then(() => {
           console.log('init end')
-          setTimeout(() => {
+          // setTimeout(() => {
             rtcConnection.createOffer().then(offer => {
               send({
                 type: 'offer',
                 offer: offer
               });
             })
-          }, 3000);
+          // }, 3000);
         });
       })
       break;

@@ -1,3 +1,5 @@
+const Actions = require('./action');
+
 module.exports = class RTC {
   constructor() {
     this.configuration = {
@@ -6,11 +8,13 @@ module.exports = class RTC {
       ]
     };
     this.dataChannelOptions = {
-      // reliable: true
-      reliable: false
+      reliable: true
+      // reliable: false
     };
     this.dataChannel = null;
     this.connection = null;
+
+    this.actions = new Actions();
   }
   init(fn, videoEl, stream) {
     console.log('init')
@@ -107,10 +111,11 @@ module.exports = class RTC {
     this.connection.ondatachannel = (event) => {
       this.dataChannel = event.channel;
       this.dataChannel.onopen = (event) => {
+        console.log('opened')
         // dataChannel.send('Hi back!');
       }
       this.dataChannel.onmessage = (event) => {
-        // mouseHandler(JSON.parse(event.data));
+        this.actions.handleActions(JSON.parse(event.data));
       }
       this.dataChannel.onerror = (error) => {
       };
@@ -124,12 +129,17 @@ module.exports = class RTC {
 
     };
     this.dataChannel.onmessage = (event) => {
-      // mouseHandler(JSON.parse(event.data));
+      this.actions.handleActions(JSON.parse(event.data));
     };
     this.dataChannel.onopen = () => {
-      // dataChannel.send(`${name} has connected.`);
+      console.log('opened!!!')
+      // this.dataChannel.send(`connected.`);
     };
     this.dataChannel.onclose = () => {
     }
+  }
+  sendData(message) {
+    // console.log(this.dataChannel.readyState)
+    this.dataChannel && this.dataChannel.send(JSON.stringify(message));
   }
 }
