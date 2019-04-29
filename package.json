@@ -1,0 +1,22 @@
+{
+  "name": "webrtc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "async-limiter": "^1.0.0",
+    "robotjs": "^0.5.1",
+    "systeminformation": "^4.1.6",
+    "ws": "^6.2.1"
+  },
+  "devDependencies": {
+    "electron": "^4.1.4"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
