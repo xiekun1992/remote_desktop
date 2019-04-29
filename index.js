@@ -1,5 +1,5 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
-const server = require('./server');
+// const server = require('./server');
 
 // 保持对window对象的全局引用，如果不这么做的话，当JavaScript对象被
 // 垃圾回收的时候，window对象将会自动的关闭
@@ -11,10 +11,10 @@ function createWindow (width = 200, height = 100) {
   // 创建浏览器窗口。
   win = new BrowserWindow({ width: 400, height: 300 })
   // 然后加载应用的 index.html。
-  server.launch().then(() => {
+  // server.launch().then(() => {
     win.loadFile('./src/index/index.html')
   //   win.loadURL('https://127.0.0.1:8080/')
-  });
+  // });
   // 打开开发者工具
   // win.webContents.openDevTools()
 
