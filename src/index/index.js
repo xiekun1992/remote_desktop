@@ -3,8 +3,8 @@ const {ipcRenderer, desktopCapturer} = require('electron');
 const SignalConnection = require('../signal_connection');
 const RTC = require('../rtc');
 
-const connection = new SignalConnection().connect('192.168.3.31', 8080);
-// const connection = new SignalConnection().connect('192.168.1.101', 8080);
+// const connection = new SignalConnection().connect('192.168.3.31', 8080);
+const connection = new SignalConnection().connect('192.168.1.101', 8080);
 let signalConn, serialNum, rtcConnection, targetUser;
 Promise
     .all([connection, si.diskLayout()])
@@ -44,6 +44,7 @@ function handler(message) {
       ul.innerHTML = html;
       break;
     case 'offer':
+      targetUser = data.name;
       rtcConnection.setRemoteOffer(data.offer);
       rtcConnection.createAnswer().then(answer => {
         send({
@@ -72,12 +73,6 @@ function send(message) {
 }
 function call(name) {
     targetUser = name;
-    // rtcConnection.createOffer().then(offer => {
-    //   send({
-    //     type: 'offer',
-    //     offer: offer
-    //   });
-    // })
     // 打开视频窗口
     ipcRenderer.send('open-control-window', targetUser);
 }
@@ -86,7 +81,7 @@ function captureScreen() {
     desktopCapturer.getSources({ types: ['window', 'screen'] }, (error, sources) => {
       if (error) reject(error);
       for (let i = 0; i < sources.length; ++i) {
-        if (sources[i].name === "Entire screen") {
+        if (sources[i].id === "screen:0:0") { // 获取主显示器的图像
           resolve(navigator.mediaDevices.getUserMedia({
             audio: false,
             video: {

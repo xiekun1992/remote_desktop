@@ -4,7 +4,8 @@ const targetUser = require('electron').remote.getGlobal('targetUser');
 const SignalConnection = require('../signal_connection');
 const RTC = require('../rtc');
 
-const connection = new SignalConnection().connect('192.168.3.31', 8080);
+// const connection = new SignalConnection().connect('192.168.3.31', 8080);
+const connection = new SignalConnection().connect('192.168.1.101', 8080)
 let signalConn, serialNum, rtcConnection;
 Promise
     .all([connection, si.diskLayout()])
@@ -83,7 +84,7 @@ function captureScreen() {
     desktopCapturer.getSources({ types: ['window', 'screen'] }, (error, sources) => {
       if (error) reject(error);
       for (let i = 0; i < sources.length; ++i) {
-        if (sources[i].name === "Entire screen" || sources[i].name === "Screen 1") {
+        if (sources[i].id === "screen:0:0") { // 获取主显示器的图像
           resolve(navigator.mediaDevices.getUserMedia({
             audio: false,
             video: {
