@@ -3,7 +3,7 @@ const { app, BrowserWindow, ipcMain } = require('electron')
 
 // 保持对window对象的全局引用，如果不这么做的话，当JavaScript对象被
 // 垃圾回收的时候，window对象将会自动的关闭
-let win, cwin;
+let win, cwin, tmpwin;
 
 global.targetUser = null;
 
@@ -61,9 +61,12 @@ ipcMain.on('open-control-window', (event, args) => {
   global.targetUser = args;
   cwin = new BrowserWindow({ width: 800, height: 600 })
   cwin.loadFile('./src/control/index.html')
-  // 打开开发者工具
-  // win.webContents.openDevTools()
+  tmpwin = new BrowserWindow({ x: -1000, y: -1000, width: 10, height: 10, title: 'xremote-tmp-window', frame: false, skipTaskbar: true })
   cwin.on('closed', () => {
     cwin = null
+    tmpwin.destroy();
+  })
+  tmpwin.on('closed', () => {
+    tmpwin = null
   })
 });
