@@ -31,10 +31,10 @@ function handler(message) {
   const data = JSON.parse(message.data);
   switch(data.type) {
     case 'login':
-      signalConn.send({
-          name: serialNum,
-          type: 'users'
-      });
+      // signalConn.send({
+      //     name: serialNum,
+      //     type: 'users'
+      // });
       break;
     case 'users': 
       let html = '';

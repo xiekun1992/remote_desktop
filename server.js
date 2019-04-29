@@ -42,15 +42,15 @@ function launch() {
           data = {};
         }
         switch(data.type) {
-          case 'users':
-            var conn = users[data.name];
-            if (conn != null) {
-              sendTo(conn, {
-                type: 'users',
-                list: Object.keys(users)
-              });
-            }
-            break;
+          // case 'users':
+          //   var conn = users[data.name];
+          //   if (conn != null) {
+          //     sendTo(conn, {
+          //       type: 'users',
+          //       list: Object.keys(users)
+          //     });
+          //   }
+          //   break;
           case 'login': 
             console.log('User logged in as', data.name);
             // if (users[data.name]) { // 已经登陆了
@@ -65,6 +65,22 @@ function launch() {
                 type: 'login',
                 success: true
               });
+              // 通知其他用户
+              for (let name in users) {
+                let userArr = [];
+                for (let key in users) {
+                  if (key != name) {
+                    userArr.push(key);
+                  }
+                }
+                let conn = users[name];
+                if (conn) {
+                  sendTo(conn, {
+                    type: 'users',
+                    list: userArr
+                  });
+                }
+              }
             // }
             break;
           case 'offer': 
