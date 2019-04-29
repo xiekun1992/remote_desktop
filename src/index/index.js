@@ -3,7 +3,8 @@ const {ipcRenderer, desktopCapturer} = require('electron');
 const SignalConnection = require('../signal_connection');
 const RTC = require('../rtc');
 
-const connection = new SignalConnection().connect('192.168.1.101', 8080);
+const connection = new SignalConnection().connect('192.168.3.31', 8080);
+// const connection = new SignalConnection().connect('192.168.1.101', 8080);
 let signalConn, serialNum, rtcConnection, targetUser;
 Promise
     .all([connection, si.diskLayout()])
@@ -60,7 +61,7 @@ function handler(message) {
       break;
     case 'answer': rtcConnection.setRemoteAnswer(data.answer); break;
     case 'candidate': rtcConnection.setCandidate(data.candidate); break;
-    case 'leave': rtcConnection.close(); break;
+    // case 'leave': rtcConnection.close(); break;
   }
 }
 function send(message) {

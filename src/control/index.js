@@ -4,7 +4,7 @@ const targetUser = require('electron').remote.getGlobal('targetUser');
 const SignalConnection = require('../signal_connection');
 const RTC = require('../rtc');
 
-const connection = new SignalConnection().connect('192.168.1.101', 8080);
+const connection = new SignalConnection().connect('192.168.3.31', 8080);
 let signalConn, serialNum, rtcConnection;
 Promise
     .all([connection, si.diskLayout()])
@@ -17,6 +17,13 @@ Promise
             type: 'login',
             name: serialNum
         });
+    })
+    .catch(console.log);
+function handler(message) {
+  const data = JSON.parse(message.data);
+  switch(data.type) {
+    case 'login':
+      captureScreen().then(stream => {
         // 初始化rtc连接
         rtcConnection = new RTC();
         rtcConnection.init(function(candidate) {
@@ -24,23 +31,18 @@ Promise
             type: 'candidate',
             candidate: candidate
           });
-        }, video);
-        rtcConnection.createOffer().then(offer => {
-          send({
-            type: 'offer',
-            offer: offer
-          });
-        })
-    })
-    .catch(console.log);
-function handler(message) {
-  const data = JSON.parse(message.data);
-  switch(data.type) {
-    case 'login':
-      // signalConn.send({
-      //     name: serialNum,
-      //     type: 'users'
-      // });
+        }, video, stream).then(() => {
+          console.log('init end')
+          setTimeout(() => {
+            rtcConnection.createOffer().then(offer => {
+              send({
+                type: 'offer',
+                offer: offer
+              });
+            })
+          }, 3000);
+        });
+      })
       break;
     case 'users': 
       // let html = '';
@@ -67,7 +69,7 @@ function handler(message) {
       break;
     case 'answer': rtcConnection.setRemoteAnswer(data.answer); break;
     case 'candidate': rtcConnection.setCandidate(data.candidate); break;
-    case 'leave': rtcConnection.close(); break;
+    // case 'leave': rtcConnection.close(); break;
   }
 }
 function send(message) {
@@ -75,4 +77,29 @@ function send(message) {
         message.name = targetUser;
     }
     signalConn.send(message);
+}
+function captureScreen() {
+  return new Promise((resolve, reject) => {
+    desktopCapturer.getSources({ types: ['window', 'screen'] }, (error, sources) => {
+      if (error) reject(error);
+      for (let i = 0; i < sources.length; ++i) {
+        if (sources[i].name === "Entire screen" || sources[i].name === "Screen 1") {
+          resolve(navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: {
+              mandatory: {
+                chromeMediaSource: 'desktop',
+                chromeMediaSourceId: sources[i].id,
+                minFrameRate: 18,
+                minWidth: screen.width,
+                maxWidth: screen.width,
+                minHeight: screen.height,
+                maxHeight: screen.height
+              }
+            }
+          }));
+        }
+      }
+    })
+  })
 }

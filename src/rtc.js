@@ -12,19 +12,30 @@ module.exports = class RTC {
     this.dataChannel = null;
     this.connection = null;
   }
-  init(fn, videoEl) {
+  init(fn, videoEl, stream) {
     console.log('init')
     return new Promise((resolve, reject) => {
       this.connection = new RTCPeerConnection(this.configuration);
-      // this.connection.onconnectionstatechange = () => {
-      //   console.log(this.connection.connectionState)
+      console.log(this.connection.signalingState)
+      console.log(this.connection.connectionState)
+      this.connection.oniceconnectionstatechange = () => {
+        console.log(this.connection.iceConnectionState)
+      }
+      this.connection.onsignalingstatechange = () => {
+        console.log(this.connection.signalingState)
+        // resolve(true);
+      }
+      this.connection.onconnectionstatechange = () => {
+        console.log(this.connection.connectionState)
+      }
       //   switch(this.connection.connectionState) {
       //     case "connected":
       //       // The connection has become fully connected
       //       resolve(true);
       //       break;
       //     case "disconnected":
-      //       resolve(false);
+      //       // resolve(false);
+      //       reject();
       //       break;
       //     case "failed":
       //       reject();
@@ -36,14 +47,21 @@ module.exports = class RTC {
       //       break;
       //   }
       // }
+      stream && this.connection.addStream(stream);
       this.connection.onaddstream = (e) => {
-        videoEl && (videoEl.srcObject = e.stream);
+        if(videoEl) {
+          videoEl.srcObject = e.stream;
+          videoEl.onloadedmetadata = (e) => videoEl.play()
+        }
       };
       this.connection.onicecandidate = (event) => {
         if (event.candidate) {
           fn && fn(event.candidate);
         }
       }
+
+      this.setDataChannel();
+      this.createDataChannel();
       resolve()
     });
   }
