@@ -26,9 +26,12 @@ module.exports = class Actions {
           }
         }; break;
       case 'scroll': {
-          var x = 1 * (+action.x / Math.abs(+action.x));
-          var y = 1 * (+action.y / Math.abs(+action.y));
-          robot.scrollMouse(x, y);
+        var x = action.x, y = action.y;
+        if (process.platform != 'win32') {
+          x = 1 * (+action.x / Math.abs(+action.x));
+          y = 1 * (+action.y / Math.abs(+action.y));
+        }
+        robot.scrollMouse(x, y);
         }; break;
       case 'down': {
         robot.mouseToggle('down');
