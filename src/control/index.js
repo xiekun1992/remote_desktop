@@ -46,6 +46,15 @@ function handler(message) {
         });
       })
       break;
+    case 'resize':
+      for (let user of data.list) {
+        if (user.name == targetUser.name) {
+          require('electron').remote.require('../../index.js').setGlobal('targetUser', user);
+          break;
+        }
+      }
+      resize();
+      break;
     case 'users': 
       // let html = '';
       // data.list && data.list.forEach((item) => {

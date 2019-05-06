@@ -70,3 +70,7 @@ ipcMain.on('open-control-window', (event, args) => {
     tmpwin = null
   })
 });
+
+exports.setGlobal = (key, value) => {
+  global[key] = value;
+}

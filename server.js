@@ -67,26 +67,14 @@ function launch() {
                 type: 'login',
                 success: true
               });
-              // 通知其他用户
-              for (let name in users) {
-                let userArr = [];
-                for (let key in users) {
-                  if (key != name) {
-                    userArr.push({
-                      name: users[key].name, 
-                      screen: users[key].screen 
-                    });
-                  }
-                }
-                let conn = users[name];
-                if (conn) {
-                  sendTo(conn, {
-                    type: 'users',
-                    list: userArr
-                  });
-                }
-              }
+              notifyOthers(users);
             // }
+            break;
+          case 'resize': 
+            users[data.name] = connection;
+            connection.name = data.name;
+            connection.screen = data.screen;
+            notifyOthers(users);
             break;
           case 'offer': 
             console.log('Sending offer to', data.name);
@@ -159,12 +147,34 @@ function launch() {
       conn.send(JSON.stringify(message));
     }
     
+    function notifyOthers(users) {
+      // 通知其他用户
+      for (let name in users) {
+        let userArr = [];
+        for (let key in users) {
+          if (key != name) {
+            userArr.push({
+              name: users[key].name, 
+              screen: users[key].screen 
+            });
+          }
+        }
+        let conn = users[name];
+        if (conn) {
+          sendTo(conn, {
+            type: 'users',
+            list: userArr
+          });
+        }
+      }
+    }
     wss.on('listening', () => {
       console.log('Server started...');
       resolve();
     });
   });
 }
+
 
 module.exports = {
   launch

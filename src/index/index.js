@@ -41,6 +41,15 @@ function handler(message) {
       //     type: 'users'
       // });
       break;
+    case 'resize':
+      userList = data.list;
+      for (let user of userList) {
+        if (user.name == targetUser) {
+          require('electron').remote.require('../../index.js').setGlobal('targetUser', user);
+          break;
+        }
+      }
+      break;
     case 'users': 
       let html = '';
       userList = data.list;
@@ -110,3 +119,14 @@ function captureScreen() {
     })
   })
 }
+
+window.addEventListener('resize', () => {
+  signalConn.send({
+    type: 'resize',
+    name: serialNum,
+    screen: {
+      width: window.screen.width,
+      height: window.screen.height
+    }
+});
+})
