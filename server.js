@@ -73,8 +73,8 @@ function launch() {
                 for (let key in users) {
                   if (key != name) {
                     userArr.push({
-                      name: users[name].name, 
-                      screen: users[name].screen 
+                      name: users[key].name, 
+                      screen: users[key].screen 
                     });
                   }
                 }
