@@ -75,7 +75,7 @@ function handler(message) {
 }
 function send(message) {
     if (targetUser) {
-        message.name = targetUser;
+        message.name = targetUser.name;
     }
     signalConn.send(message);
 }

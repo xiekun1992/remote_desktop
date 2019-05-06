@@ -3,9 +3,10 @@ const {ipcRenderer, desktopCapturer} = require('electron');
 const SignalConnection = require('../signal_connection');
 const RTC = require('../rtc');
 
+// const connection = new SignalConnection().connect('192.168.1.101', 8080);
 // const connection = new SignalConnection().connect('192.168.3.31', 8080);
 const connection = new SignalConnection().connect('13.231.201.110', 8080);
-let signalConn, serialNum, rtcConnection, targetUser;
+let signalConn, serialNum, rtcConnection, targetUser, userList = [];
 Promise
     .all([connection, si.diskLayout()])
     .then(([conn, data]) => {
@@ -15,7 +16,11 @@ Promise
         sn.innerText = serialNum;
         signalConn.send({
             type: 'login',
-            name: serialNum
+            name: serialNum,
+            screen: {
+              width: window.screen.width,
+              height: window.screen.height
+            }
         });
     })
     .catch(console.log);
@@ -38,8 +43,9 @@ function handler(message) {
       break;
     case 'users': 
       let html = '';
-      data.list && data.list.forEach((item) => {
-          html += `<li><a href="javascript:call('${item}')">${item}</a></li>`;
+      userList = data.list;
+      data.list && data.list.forEach((item, i) => {
+          html += `<li><a href="javascript:call(${i})">${item.name}</a></li>`;
       });
       ul.innerHTML = html;
       break;
@@ -66,15 +72,18 @@ function handler(message) {
   }
 }
 function send(message) {
-    if (targetUser) {
-        message.name = targetUser;
-    }
-    signalConn.send(message);
+  if (targetUser) {
+      message.name = targetUser;
+  }
+  signalConn.send(message);
 }
-function call(name) {
+function call(index) {
+  if (userList[index]) {
+    let name = userList[index].name;
     targetUser = name;
     // 打开视频窗口
-    ipcRenderer.send('open-control-window', targetUser);
+    ipcRenderer.send('open-control-window', userList[index]);
+  }
 }
 function captureScreen() {
   return new Promise((resolve, reject) => {

@@ -1,20 +1,33 @@
 function sendData(params) {
   rtcConnection && rtcConnection.sendData(params);
 }
+// 辗转相除法求最大公约数
+function gcd(a, b) {
+  let c = -1;
+  while (true) {
+    c = a % b;
+    if (c == 0) return b;
+    a = b;
+    b = c;
+  }
+}
 let width, height, offsetLeft, offsetTop;
 let main = video;
 // 调整容器元素的大小
+
 function resize() {
-  let delta = window.innerHeight * 16 - window.innerWidth * 9;
+  let res = gcd(targetUser.screen.width, targetUser.screen.height);
+  let scalew = targetUser.screen.width / res, scaleh = targetUser.screen.height / res;
+  let delta = window.innerHeight * scalew - window.innerWidth * scaleh;
   if (delta == 0) {
     height = window.innerHeight;
     width = window.innerWidth;
   } else if (delta > 0) {
     width = window.innerWidth;
-    height = Math.round(window.innerWidth * 9 / 16);
+    height = Math.round(window.innerWidth * scaleh / scalew);
   } else {
     height = window.innerHeight;
-    width = Math.round(window.innerHeight * 16 / 9);
+    width = Math.round(window.innerHeight * scalew / scaleh);
   }
   //mainBg.style.height = 
   main.style.height = height + 'px';

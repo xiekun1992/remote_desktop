@@ -33,6 +33,7 @@ function launch() {
       users = {};
     
     wss.on('connection', connection => {
+      console.log(connection._socket.remoteAddress, connection._socket.remotePort);
       connection.on('message', message => {
         var data;
         try {
@@ -61,6 +62,7 @@ function launch() {
             // } else { // 第一次登陆
               users[data.name] = connection;
               connection.name = data.name;
+              connection.screen = data.screen;
               sendTo(connection, {
                 type: 'login',
                 success: true
@@ -70,7 +72,10 @@ function launch() {
                 let userArr = [];
                 for (let key in users) {
                   if (key != name) {
-                    userArr.push(key);
+                    userArr.push({
+                      name: users[name].name, 
+                      screen: users[name].screen 
+                    });
                   }
                 }
                 let conn = users[name];
