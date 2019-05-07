@@ -1,29 +1,10 @@
-const si = require('systeminformation');
 const {ipcRenderer, desktopCapturer} = require('electron');
-const SignalConnection = require('../signal_connection');
 const RTC = require('../rtc');
 
 // const connection = new SignalConnection().connect('192.168.1.101', 8080);
 // const connection = new SignalConnection().connect('192.168.3.31', 8080);
-const connection = new SignalConnection().connect('13.231.201.110', 8080);
-let signalConn, serialNum, rtcConnection, targetUser, userList = [];
-Promise
-    .all([connection, si.diskLayout()])
-    .then(([conn, data]) => {
-        signalConn = conn;
-        signalConn.message(handler);
-        serialNum = data[0].serialNum;
-        sn.innerText = serialNum;
-        signalConn.send({
-            type: 'login',
-            name: serialNum,
-            screen: {
-              width: window.screen.width,
-              height: window.screen.height
-            }
-        });
-    })
-    .catch(console.log);
+// const connection = new SignalConnection().connect('13.231.201.110', 8080);
+let rtcConnection, targetUser, userList = [];
 // 初始化rtc连接
 rtcConnection = new RTC();
 rtcConnection.init(function(candidate) {
@@ -32,29 +13,26 @@ rtcConnection.init(function(candidate) {
     candidate: candidate
   });
 });
+ipcRenderer.on('ws-handle', (event, args) => {
+  handler(args)
+})
 function handler(message) {
-  const data = JSON.parse(message.data);
+  let data = JSON.parse(message.data);
+  console.log(data)
   switch(data.type) {
     case 'login':
-      // signalConn.send({
-      //     name: serialNum,
-      //     type: 'users'
-      // });
       break;
-    case 'resize':
-      userList = data.list;
-      for (let user of userList) {
-        if (user.name == targetUser) {
-          require('electron').remote.require('../../index.js').setGlobal('targetUser', user);
-          break;
-        }
-      }
+    case 'serialNumber':
+      sn.innerText = data.data;
       break;
     case 'users': 
       let html = '';
       userList = data.list;
       data.list && data.list.forEach((item, i) => {
           html += `<li><a href="javascript:call(${i})">${item.name}</a></li>`;
+          if (item.name == targetUser) {
+            ipcRenderer.send('change-user', item);
+          }
       });
       ul.innerHTML = html;
       break;
@@ -81,10 +59,7 @@ function handler(message) {
   }
 }
 function send(message) {
-  if (targetUser) {
-      message.name = targetUser;
-  }
-  signalConn.send(message);
+  ipcRenderer.send('ws-send', message);
 }
 function call(index) {
   if (userList[index]) {
@@ -119,14 +94,3 @@ function captureScreen() {
     })
   })
 }
-
-window.addEventListener('resize', () => {
-  signalConn.send({
-    type: 'resize',
-    name: serialNum,
-    screen: {
-      width: window.screen.width,
-      height: window.screen.height
-    }
-});
-})

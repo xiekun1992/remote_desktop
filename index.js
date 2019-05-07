@@ -1,19 +1,59 @@
+const electron = require('electron')
 const { app, BrowserWindow, ipcMain } = require('electron')
-// const server = require('./server');
-
+const WebSocket = require('ws');
+const si = require('systeminformation');
+const SignalConnection = require('./src/signal_connection');
 // 保持对window对象的全局引用，如果不这么做的话，当JavaScript对象被
 // 垃圾回收的时候，window对象将会自动的关闭
 let win, cwin, tmpwin;
 
 global.targetUser = null;
+// 接受自签名https证书
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+// 创建信令连接对象
+const connection = new SignalConnection().connect('13.231.201.110', 8080);
+let signalConn, serialNum, currentDisplay;
+Promise
+  .all([connection, si.diskLayout()])
+  .then(([conn, data]) => {
+    signalConn = conn;
+    signalConn.message(handler);
+    serialNum = data[0].serialNum;
+    // 显示序列号
+    handler({
+      data: JSON.stringify({
+        type: 'serialNumber',
+        data: serialNum
+      })
+    });
+    let { width, height} = currentDisplay.workAreaSize;
+    signalConn.send({
+      type: 'login',
+      name: serialNum,
+      screen: { width, height }
+    });
+  })
+  .catch(console.log);
+
+function handler(message) {
+  win && win.webContents.send('ws-handle', message);
+}
+function send(message) {
+  if (global.targetUser) {
+      message.name = global.targetUser.name;
+  }
+  signalConn.send(message);
+}
+ipcMain.on('ws-send', (event, args) => {
+  send(args);
+})
+
 
 function createWindow (width = 200, height = 100) {
-  // 创建浏览器窗口。
   win = new BrowserWindow({ width: 400, height: 300 })
-  // 然后加载应用的 index.html。
-  // server.launch().then(() => {
-    win.loadFile('./src/index/index.html')
-  //   win.loadURL('https://127.0.0.1:8080/')
+  win.loadFile('./src/index/index.html')
+  // win.webContents.on('did-finish-load', function() {
+  //   win.webContents.send('ping', 'whoooooooh!');
   // });
   // 打开开发者工具
   // win.webContents.openDevTools()
@@ -30,7 +70,21 @@ function createWindow (width = 200, height = 100) {
 // Electron 会在初始化后并准备
 // 创建浏览器窗口时，调用这个函数。
 // 部分 API 在 ready 事件触发后才能使用。
-app.on('ready', createWindow)
+app.on('ready', () => {
+  currentDisplay = electron.screen.getPrimaryDisplay();
+  // https://electronjs.org/docs/api/screen 检测屏幕设置变化
+  electron.screen.on('display-metrics-changed', (event, display, changedMetrics) => {
+    if (display == currentDisplay) {
+      let { width, height} = currentDisplay.workAreaSize;
+      signalConn.send({
+        type: 'resize',
+        name: serialNum,
+        screen: { width, height }
+      });
+    }
+  })
+  createWindow();
+})
 
 // 当全部窗口关闭时退出。
 app.on('window-all-closed', () => {
@@ -48,7 +102,7 @@ app.on('activate', () => {
     createWindow()
   }
 })
-
+// 屏蔽证书报错
 app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
   // On certificate error we disable default behaviour (stop loading the page)
   // and we then say "it is all fine - true" to the callback
@@ -70,7 +124,3 @@ ipcMain.on('open-control-window', (event, args) => {
     tmpwin = null
   })
 });
-
-exports.setGlobal = (key, value) => {
-  global[key] = value;
-}

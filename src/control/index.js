@@ -1,9 +1,15 @@
 const si = require('systeminformation');
 const {ipcRenderer, desktopCapturer} = require('electron');
-const targetUser = require('electron').remote.getGlobal('targetUser');
+let targetUser = require('electron').remote.getGlobal('targetUser');
 const SignalConnection = require('../signal_connection');
 const RTC = require('../rtc');
-
+setInterval(() => {
+  let tmpUser = require('electron').remote.getGlobal('targetUser');
+  if (tmpUser && JSON.stringify(tmpUser) != JSON.stringify(targetUser)) {
+    targetUser = tmpUser;
+    resize();
+  } 
+}, 1000);
 // const connection = new SignalConnection().connect('192.168.1.101', 8080);
 // const connection = new SignalConnection().connect('192.168.3.31', 8080);
 const connection = new SignalConnection().connect('13.231.201.110', 8080);
@@ -46,21 +52,12 @@ function handler(message) {
         });
       })
       break;
-    case 'resize':
-      for (let user of data.list) {
-        if (user.name == targetUser.name) {
-          require('electron').remote.require('../../index.js').setGlobal('targetUser', user);
-          break;
-        }
-      }
-      resize();
-      break;
     case 'users': 
-      // let html = '';
-      // data.list && data.list.forEach((item) => {
-      //     html += `<li><a href="javascript:call('${item}')">${item}</a></li>`;
-      // });
-      // ul.innerHTML = html;
+      data.list && data.list.forEach((item, i) => {
+        if (item.name == targetUser.name) {
+          ipcRenderer.send('change-user', item);
+        }
+      });
       break;
     case 'offer':
       rtcConnection.setRemoteOffer(data.offer);
