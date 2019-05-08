@@ -7,7 +7,7 @@ captureScreen().then(stream => {
   // 初始化rtc连接
   rtcConnection = new RTC();
   rtcConnection.init(function(candidate) {
-    console.log('candidate', candidate)
+    // console.log('candidate', candidate)
     send({
       type: 'candidate',
       candidate: candidate
@@ -16,7 +16,7 @@ captureScreen().then(stream => {
     console.log('init end')
     // setTimeout(() => {
       rtcConnection.createOffer().then(offer => {
-        console.log('offer', offer)
+        // console.log('offer', offer)
         send({
           type: 'offer',
           offer: offer
@@ -30,6 +30,7 @@ ipcRenderer.on('ws-handle', (event, args) => {
 })
 function handler(message) {
   const data = JSON.parse(message.data);
+  console.log(data)
   switch(data.type) {
     case 'offer':
       rtcConnection.setRemoteOffer(data.offer);
