@@ -64,7 +64,7 @@ function captureScreen() {
           resolve(navigator.mediaDevices.getUserMedia({
             audio: false,
             video: {
-              cursor: 'never',
+              // cursor: 'never',
               mandatory: {
                 chromeMediaSource: 'desktop',
                 chromeMediaSourceId: sources[i].id,

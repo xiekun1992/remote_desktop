@@ -10,9 +10,9 @@ global.targetUser = null;
 // 接受自签名https证书
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 // 创建信令连接对象
-const connection = new SignalConnection().connect('192.168.1.101', 8080);
+// const connection = new SignalConnection().connect('192.168.1.101', 8080);
 // const connection = new SignalConnection().connect('192.168.3.31', 8080);
-// const connection = new SignalConnection().connect('13.231.201.110', 8080);
+const connection = new SignalConnection().connect('13.231.201.110', 8080);
 let signalConn, serialNum, currentDisplay;
 Promise
   .all([connection, si.diskLayout()])
