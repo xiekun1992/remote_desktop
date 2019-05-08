@@ -1,64 +1,33 @@
-const si = require('systeminformation');
 const {ipcRenderer, desktopCapturer} = require('electron');
-let targetUser = require('electron').remote.getGlobal('targetUser');
-const SignalConnection = require('../signal_connection');
 const RTC = require('../rtc');
-setInterval(() => {
-  let tmpUser = require('electron').remote.getGlobal('targetUser');
-  if (tmpUser && JSON.stringify(tmpUser) != JSON.stringify(targetUser)) {
-    targetUser = tmpUser;
-    resize();
-  } 
-}, 1000);
-// const connection = new SignalConnection().connect('192.168.1.101', 8080);
-// const connection = new SignalConnection().connect('192.168.3.31', 8080);
-const connection = new SignalConnection().connect('13.231.201.110', 8080);
-let signalConn, serialNum, rtcConnection;
-Promise
-    .all([connection, si.diskLayout()])
-    .then(([conn, data]) => {
-        signalConn = conn;
-        signalConn.message(handler);
-        serialNum = data[0].serialNum;
-        //sn.innerText = serialNum;
-        signalConn.send({
-            type: 'login',
-            name: serialNum
+
+let rtcConnection;
+captureScreen().then(stream => {
+  // 初始化rtc连接
+  rtcConnection = new RTC();
+  rtcConnection.init(function(candidate) {
+    send({
+      type: 'candidate',
+      candidate: candidate
+    });
+  }, video, stream).then(() => {
+    console.log('init end')
+    // setTimeout(() => {
+      rtcConnection.createOffer().then(offer => {
+        send({
+          type: 'offer',
+          offer: offer
         });
-    })
-    .catch(console.log);
+      })
+    // }, 3000);
+  });
+})
+ipcRenderer.on('ws-handle', (event, args) => {
+  handler(args)
+})
 function handler(message) {
   const data = JSON.parse(message.data);
   switch(data.type) {
-    case 'login':
-      captureScreen().then(stream => {
-        // 初始化rtc连接
-        rtcConnection = new RTC();
-        rtcConnection.init(function(candidate) {
-          send({
-            type: 'candidate',
-            candidate: candidate
-          });
-        }, video, stream).then(() => {
-          console.log('init end')
-          // setTimeout(() => {
-            rtcConnection.createOffer().then(offer => {
-              send({
-                type: 'offer',
-                offer: offer
-              });
-            })
-          // }, 3000);
-        });
-      })
-      break;
-    case 'users': 
-      data.list && data.list.forEach((item, i) => {
-        if (item.name == targetUser.name) {
-          ipcRenderer.send('change-user', item);
-        }
-      });
-      break;
     case 'offer':
       rtcConnection.setRemoteOffer(data.offer);
       rtcConnection.createAnswer().then(answer => {
@@ -81,10 +50,7 @@ function handler(message) {
   }
 }
 function send(message) {
-    if (targetUser) {
-        message.name = targetUser.name;
-    }
-    signalConn.send(message);
+  ipcRenderer.send('ws-send', message);
 }
 function captureScreen() {
   return new Promise((resolve, reject) => {
@@ -95,6 +61,7 @@ function captureScreen() {
           resolve(navigator.mediaDevices.getUserMedia({
             audio: false,
             video: {
+              cursor: 'never',
               mandatory: {
                 chromeMediaSource: 'desktop',
                 chromeMediaSourceId: sources[i].id,

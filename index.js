@@ -1,6 +1,6 @@
 const electron = require('electron')
 const { app, BrowserWindow, ipcMain } = require('electron')
-const WebSocket = require('ws');
+// const WebSocket = require('ws');
 const si = require('systeminformation');
 const SignalConnection = require('./src/signal_connection');
 // 保持对window对象的全局引用，如果不这么做的话，当JavaScript对象被
@@ -11,7 +11,9 @@ global.targetUser = null;
 // 接受自签名https证书
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 // 创建信令连接对象
-const connection = new SignalConnection().connect('13.231.201.110', 8080);
+const connection = new SignalConnection().connect('192.168.1.101', 8080);
+// const connection = new SignalConnection().connect('192.168.3.31', 8080);
+// const connection = new SignalConnection().connect('13.231.201.110', 8080);
 let signalConn, serialNum, currentDisplay;
 Promise
   .all([connection, si.diskLayout()])

@@ -139,7 +139,7 @@ module.exports = class RTC {
     }
   }
   sendData(message) {
-    // console.log(this.dataChannel.readyState)
-    this.dataChannel && this.dataChannel.send(JSON.stringify(message));
+    console.log('dataChannel.readyState', this.dataChannel.readyState)
+    this.dataChannel && (this.dataChannel.readyState == 'open') && this.dataChannel.send(JSON.stringify(message));
   }
 }
