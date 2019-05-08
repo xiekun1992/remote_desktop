@@ -77,7 +77,7 @@ function launch() {
             notifyOthers(users);
             break;
           case 'offer': 
-            console.log('Sending offer to', data.name);
+            console.log('Sending offer to', data.name, data);
             var conn = users[data.name];
             if (conn != null) {
               connection.otherName = data.name;
@@ -100,7 +100,7 @@ function launch() {
             }
             break;
           case 'candidate':
-            console.log('Sending candidate to', data.name);
+            console.log('Sending candidate to', data.name, data);
             var conn = users[data.name];
             if (conn != null) {
               sendTo(conn, {

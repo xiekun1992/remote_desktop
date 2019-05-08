@@ -16,7 +16,7 @@
   "scripts": {
     "rebuild": "npm rebuild --runtime=electron --target=4.1.4 --disturl=https://atom.io/download/atom-shell --abi=64",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "npx electron ."
   },
   "keywords": [],
   "author": "",

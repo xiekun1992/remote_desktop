@@ -34,7 +34,13 @@ function handler(message) {
       ul.innerHTML = html;
       break;
     case 'offer':
-      targetUser = data.name;
+      for (let user of userList) {
+        if (user.name == data.name) {
+          targetUser = user;
+          break;
+        }
+      }
+      ipcRenderer.send('set-target-user', targetUser)
       rtcConnection.setRemoteOffer(data.offer);
       rtcConnection.createAnswer().then(answer => {
         send({
@@ -56,12 +62,10 @@ function handler(message) {
   }
 }
 function send(message) {
-  ipcRenderer.send('ws-send', message);
+  ipcRenderer.send('ws-send', JSON.stringify(message));
 }
 function call(index) {
   if (userList[index]) {
-    let name = userList[index].name;
-    targetUser = name;
     // 打开视频窗口
     ipcRenderer.send('open-control-window', userList[index]);
   }

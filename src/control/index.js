@@ -1,4 +1,5 @@
 const {ipcRenderer, desktopCapturer} = require('electron');
+let targetUser = require('electron').remote.getGlobal('targetUser')
 const RTC = require('../rtc');
 
 let rtcConnection;
@@ -6,6 +7,7 @@ captureScreen().then(stream => {
   // 初始化rtc连接
   rtcConnection = new RTC();
   rtcConnection.init(function(candidate) {
+    console.log('candidate', candidate)
     send({
       type: 'candidate',
       candidate: candidate
@@ -14,6 +16,7 @@ captureScreen().then(stream => {
     console.log('init end')
     // setTimeout(() => {
       rtcConnection.createOffer().then(offer => {
+        console.log('offer', offer)
         send({
           type: 'offer',
           offer: offer
@@ -50,7 +53,7 @@ function handler(message) {
   }
 }
 function send(message) {
-  ipcRenderer.send('ws-send', message);
+  ipcRenderer.send('ws-send', JSON.stringify(message));
 }
 function captureScreen() {
   return new Promise((resolve, reject) => {

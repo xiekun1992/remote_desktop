@@ -1,6 +1,5 @@
 const electron = require('electron')
 const { app, BrowserWindow, ipcMain } = require('electron')
-// const WebSocket = require('ws');
 const si = require('systeminformation');
 const SignalConnection = require('./src/signal_connection');
 // 保持对window对象的全局引用，如果不这么做的话，当JavaScript对象被
@@ -44,19 +43,22 @@ function send(message) {
   if (global.targetUser) {
       message.name = global.targetUser.name;
   }
+  console.log(message)
   signalConn.send(message);
 }
 ipcMain.on('ws-send', (event, args) => {
-  send(args);
+  send(JSON.parse(args));
 })
-
 
 function createWindow (width = 200, height = 100) {
   win = new BrowserWindow({ width: 400, height: 300 })
   win.loadFile('./src/index/index.html')
-  // win.webContents.on('did-finish-load', function() {
-  //   win.webContents.send('ping', 'whoooooooh!');
-  // });
+  win.webContents.on('did-finish-load', () => {
+    console.log('did-finish-load')    
+  });
+  win.on('ready-to-show', () => {
+
+  })
   // 打开开发者工具
   // win.webContents.openDevTools()
 
@@ -126,3 +128,6 @@ ipcMain.on('open-control-window', (event, args) => {
     tmpwin = null
   })
 });
+ipcMain.on('set-target-user', (event, args) => {
+  global.targetUser = args;
+})
