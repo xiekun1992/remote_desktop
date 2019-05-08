@@ -36,8 +36,26 @@ Promise
   })
   .catch(console.log);
 
+let didFinishLoad = false, queue = [], timer;
 function handler(message) {
-  win && win.webContents.send('ws-handle', message);
+  if (didFinishLoad) {
+    win && win.webContents.send('ws-handle', message);
+  } else {
+    queue.push(message);
+    waitUntilFinish();
+  }
+}
+function waitUntilFinish() {
+  clearInterval(timer);
+  timer = setInterval(() => {
+    if (didFinishLoad) {
+      while(queue.length > 0) {
+        let message = queue.shift();
+        handler(message);
+      }
+      clearInterval(timer);
+    }
+  }, 200);
 }
 function send(message) {
   if (global.targetUser) {
@@ -55,10 +73,9 @@ function createWindow (width = 200, height = 100) {
   win.loadFile('./src/index/index.html')
   win.webContents.on('did-finish-load', () => {
     console.log('did-finish-load')    
-  });
-  win.on('ready-to-show', () => {
+    didFinishLoad = true;
 
-  })
+  });
   // 打开开发者工具
   // win.webContents.openDevTools()
 
