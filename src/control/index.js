@@ -65,15 +65,14 @@ function captureScreen() {
           resolve(navigator.mediaDevices.getUserMedia({
             audio: false,
             video: {
-              // cursor: 'never',
               mandatory: {
                 chromeMediaSource: 'desktop',
                 chromeMediaSourceId: sources[i].id,
-                minFrameRate: 18,
-                minWidth: screen.width,
-                maxWidth: screen.width,
-                minHeight: screen.height,
-                maxHeight: screen.height
+                maxFrameRate: 1,
+                // minWidth: screen.width,
+                // maxWidth: screen.width,
+                // minHeight: screen.height,
+                // maxHeight: screen.height
               }
             }
           }));
