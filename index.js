@@ -11,7 +11,7 @@ global.master = false;
 // 接受自签名https证书
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 // 创建信令连接对象
-const connection = new SignalConnection().connect('192.168.1.101', 8080);
+const connection = new SignalConnection().connect('192.168.1.104', 8080);
 // const connection = new SignalConnection().connect('192.168.3.31', 8080);
 // const connection = new SignalConnection().connect('13.231.201.110', 8080);
 let signalConn, serialNum, currentDisplay;
@@ -143,9 +143,10 @@ ipcMain.on('open-control-window', (event, args) => {
   global.master = true;
   cwin = new BrowserWindow({ width: 800, height: 600 })
   cwin.loadFile('./src/control/index.html')
-  tmpwin = new BrowserWindow({ x: -1000, y: -1000, width: 10, height: 10, title: 'xremote-tmp-window', frame: false, skipTaskbar: true })
+  tmpwin = new BrowserWindow({ x: -0, y: -0, width: 10, height: 10, title: 'xremote-tmp-window', frame: false, skipTaskbar: true })
   cwin.on('closed', () => {
     cwin = null
+    global.master = false;
     tmpwin.destroy();
   })
   tmpwin.on('closed', () => {
