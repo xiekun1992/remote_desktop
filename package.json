@@ -1,24 +1,19 @@
 {
-  "name": "xremote",
+  "name": "record",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "dependencies": {
-    "async-limiter": "^1.0.0",
-    "robotjs": "^0.5.1",
-    "systeminformation": "^4.1.6",
-    "ws": "^6.2.1"
-  },
-  "devDependencies": {
-    "electron": "^4.1.4",
-    "electron-packager": "^13.1.1"
-  },
   "scripts": {
-    "rebuild": "npm rebuild --runtime=electron --target=4.1.4 --disturl=https://atom.io/download/atom-shell --abi=64",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npx electron ."
+    "rebuild": "npm rebuild --runtime=electron --target=4.1.4 --disturl=https://atom.io/download/atom-shell --abi=64"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^4.1.4"
+  },
+  "dependencies": {
+    "robotjs": "^0.5.1"
+  }
 }
