@@ -1,2 +1,5 @@
 node_modules/
 xremote-*
+.vs
+Debug
+x64
